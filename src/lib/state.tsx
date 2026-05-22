@@ -115,15 +115,37 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       };
 
       // 1. Initial State from localStorage / defaults
-      const initialSettings = loadData('seba_settings', defaultAppSettings);
-      const initialUsers = loadData('seba_users', defaultUsers);
-      const initialCategories = loadData('seba_categories', defaultCategories);
-      const initialServices = loadData('seba_services', defaultServices);
-      const initialOrders = loadData('seba_orders', defaultOrders);
-      const initialTransactions = loadData('seba_transactions', defaultTransactions);
-      const initialTickets = loadData('seba_tickets', defaultTickets);
-      const initialCoupons = loadData('seba_coupons', defaultCoupons);
-      const initialBlogs = loadData('seba_blogs', defaultBlogs);
+      let initialSettings = loadData('seba_settings', defaultAppSettings);
+      let initialUsers = loadData('seba_users', defaultUsers);
+      let initialCategories = loadData('seba_categories', defaultCategories);
+      let initialServices = loadData('seba_services', defaultServices);
+      let initialOrders = loadData('seba_orders', defaultOrders);
+      let initialTransactions = loadData('seba_transactions', defaultTransactions);
+      let initialTickets = loadData('seba_tickets', defaultTickets);
+      let initialCoupons = loadData('seba_coupons', defaultCoupons);
+      let initialBlogs = loadData('seba_blogs', defaultBlogs);
+
+      // Force migration for digital products store schema
+      if (initialCategories.some(c => c.id === 'cat-fb') || !initialCategories.some(c => c.id === 'cat-subs')) {
+        console.log('Migrating local cached SMM schema to Digital Product Store schema...');
+        initialCategories = defaultCategories;
+        localStorage.setItem('seba_categories', JSON.stringify(defaultCategories));
+        
+        initialServices = defaultServices;
+        localStorage.setItem('seba_services', JSON.stringify(defaultServices));
+        
+        initialOrders = defaultOrders;
+        localStorage.setItem('seba_orders', JSON.stringify(defaultOrders));
+        
+        initialTickets = defaultTickets;
+        localStorage.setItem('seba_tickets', JSON.stringify(defaultTickets));
+
+        initialTransactions = defaultTransactions;
+        localStorage.setItem('seba_transactions', JSON.stringify(defaultTransactions));
+
+        initialSettings = defaultAppSettings;
+        localStorage.setItem('seba_settings', JSON.stringify(defaultAppSettings));
+      }
 
       setSettings(initialSettings);
       setUsersState(initialUsers);

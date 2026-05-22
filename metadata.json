@@ -1,6 +1,6 @@
 {
   "name": "Digital Gallery",
-  "description": "A premium, bilingual (Bangla + English) eCommerce SaaS platform for digital growth services, social boosting, and follow-link tracking with a full user and admin dashboard.",
+  "description": "A premium, bilingual (Bangla + English) eCommerce platform for digital products, premium video/music subscriptions, software activation license keys, instant game topups (diamonds/vouchers), and social growth packages with an advanced support system.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

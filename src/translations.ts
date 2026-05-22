@@ -2,13 +2,13 @@ export type Language = 'bn' | 'en';
 
 export const translations = {
   bn: {
-    siteName: "ডিজিটাল ফলোয়ার ও লিংক সার্ভিস",
+    siteName: "ডিজিটাল গ্যালারি | প্রিমিয়াম সাবস্ক্রিপশন ও লাইসেন্স মার্ট",
     navHome: "হোম",
-    navServices: "সার্ভিস সমূহ",
+    navServices: "প্রোডাক্ট ক্যাটালগ",
     navCategories: "ক্যাটেগরি",
     navTickets: "সাপোর্ট টিকেট",
     navAffiliate: "এফিলিয়েট",
-    navBlog: "ব্লগ ও নিউজ",
+    navBlog: "ব্লগ ও গাইডস",
     navFaq: "এফএকিউ ও যোগাযোগ",
     navLogin: "লগইন",
     navRegister: "রেজিস্ট্রেশন",
@@ -18,22 +18,22 @@ export const translations = {
     
     // Bottom Sticky Navigation (Mobile)
     bottomHome: "হোম",
-    bottomServices: "সার্ভিস",
+    bottomServices: "মার্ট স্টোর",
     bottomDashboard: "প্রোফাইল",
     bottomTickets: "সাপোর্ট",
     bottomAdmin: "অ্যাডমিন",
 
     // Hero Section
-    heroTitlePre: "আপনার সোশ্যাল গ্রোথ পান",
-    heroTitleHighlight: "এক ক্লিকে!",
-    heroSubtitle: "বাংলাদেশি ও আন্তর্জাতিক রিয়েল এবং একটিভ সোশ্যাল মিডিয়া ফলোয়ার, লাইক, এবং ওয়েব ট্রাফিক সার্ভিস সাশ্রয়ী মূল্যে অতি দ্রুত ডেলিভারি।",
-    heroCtaServices: "সার্ভিসগুলো দেখুন",
-    heroCtaDashboard: "ড্যাশবোর্ডে যান",
+    heroTitlePre: "প্রিমিয়াম ডিজিটাল প্রোডাক্ট ও লাইসেন্স",
+    heroTitleHighlight: "এক ক্লিকে বুঝে নিন!",
+    heroSubtitle: "নেটফ্লিক্স, ক্যানভা প্রো, গেম ডায়মন্ড টপ-আপ, জেনুইন উইন্ডোজ অ্যাক্টিভেশন কি এবং প্রিমিয়াম ওয়েব থিম-প্লাগইনসমূহ কিনুন বাংলাদেশে সবচেয়ে সাশ্রয়ী মূল্যে ইন্সট্যান্ট ডেলিভারির সাথে।",
+    heroCtaServices: "প্রোডাক্ট ক্যাটালগ দেখুন",
+    heroCtaDashboard: "গ্রাহক ড্যাশবোর্ড",
 
     // Stats
-    statCompletedOrders: "সফল অর্ডার",
+    statCompletedOrders: "ডেলিভারি সম্পন্ন",
     statActiveUsers: "সক্রিয় গ্রাহক",
-    statServices: "প্রিমিয়াম সার্ভিস",
+    statServices: "প্রিমিয়াম প্রোডাক্ট",
     statSupportTime: "গ্রাহক সাপোর্ট",
     statInstantDelivery: "ইনস্ট্যান্ট ডেলিভারি",
 
@@ -47,15 +47,15 @@ export const translations = {
 
     // Why Choose Us
     whyTitle: "কেন আমাদের বেছে নেবেন?",
-    whySubtitle: "আমরা আপনাকে দিচ্ছি গুণগত মান, নিরাপত্তা এবং শতভাগ বিশ্বস্ততা।",
+    whySubtitle: "আমরা আপনাকে দিচ্ছি গুণগত মান, নিরাপত্তা এবং শতভাগ বিশ্বস্ত মূল প্রোডাক্ট সরবরাহ।",
     whySec1Title: "নিরাপদ লেনদেন",
-    whySec1Desc: "বিকাশ, নগদ, রকেট এবং অন্যন্য নিরাপদ উপায়ে লেনদেনের সুবিধা।",
-    whySec2Title: "দ্রুততম ডেলিভারি",
-    whySec2Desc: "আমাদের অধিকাংশ সার্ভিস স্বয়ংক্রিয়ভাবে সঙ্গে সঙ্গে শুরু হয়।",
+    whySec1Desc: "বিকাশ, নগদ, রকেট এবং অন্যন্য নিরাপদ উপায়ে সহজ পেমেন্টের সুবিধা।",
+    whySec2Title: "ইনস্ট্যান্ট দ্রুত ডেলিভারি",
+    whySec2Desc: "আমাদের অধিকাংশ অ্যাকাউন্ট, সাবস্ক্রিপশন ও কি পেমেন্ট করার পরেই দ্রুত ডেলিভারি দেওয়া হয়।",
     whySec3Title: "২৪/৭ লাইভ টিকেট সাপোর্ট",
-    whySec3Desc: "যেকোনো প্রয়োজনে আমাদের ডেডিকেটেড টিম রয়েছে সার্বক্ষণিক সেবায়।",
-    whySec4Title: "সাশ্রয়ী রেট",
-    whySec4Desc: "বাজারে সবচেয়ে কম মূল্যে হাই-কোয়ালিটি সার্ভিস পাওয়ার নিশ্চয়তা।",
+    whySec3Desc: "যেকোনো সাহায্য বা লাইসেন্স অ্যাক্টিভেশনে আমাদের টিম রয়েছে সার্বক্ষণিক সেবায়।",
+    whySec4Title: "সবচেয়ে সাশ্রয়ী রেট",
+    whySec4Desc: "অরজিনাল সোর্স থেকে প্রোডাক্ট আনার কারণে বাজারে সবচেয়ে কম মূল্যে অফার করার গ্যারান্টি।",
 
     // Promo & Announcements
     announcementLabel: "ঘোষণা:",
@@ -71,29 +71,29 @@ export const translations = {
     refBtnJoin: "রেফারাল ফাইলে যান",
 
     // Services Pages
-    categoriesTitle: "সার্ভিস ক্যাটেগরি সমূহ",
-    categoriesSubtitle: "আপনার কাঙ্ক্ষিত সোশ্যাল মিডিয়া বা সার্ভিস ক্যাটেগরি সিলেক্ট করুন",
-    servicesInCat: "%cat% ক্যাটেগরির সব সার্ভিস",
+    categoriesTitle: "ডিজিটাল গ্যালারি প্রোডাক্ট ক্যাটালগ",
+    categoriesSubtitle: "আমাদের প্রিমিয়াম সাবস্ক্রিপশন, অরিজিনাল সফটওয়্যার লাইসেন্স কি, গেম টপ-আপ এবং প্রমোশনাল প্যাকগুলো থেকে বেছে নিন",
+    servicesInCat: "%cat%-এর সব আইটেম",
     servicePrice: "মূল্য:",
-    serviceMin: "সর্বনিম্ন:",
-    serviceMax: "সর্বোচ্চ:",
+    serviceMin: "সর্বনিম্ন ক্রয়:",
+    serviceMax: "সর্বোচ্চ ক্রয়:",
     serviceDelivery: "ডেলিভারি সময়:",
-    orderNowBtn: "অর্ডার করুন",
-    searchPlaceholder: "সার্ভিস খুঁজুন...",
-    noServicesFound: "কোন সার্ভিস পাওয়া যায়নি!",
+    orderNowBtn: "এখনই কিনুন",
+    searchPlaceholder: "প্রোডাক্ট খুঁজুন...",
+    noServicesFound: "কোন প্রোডাক্ট পাওয়া যায়নি!",
 
     // Service Details & Order Form
-    orderFormTitle: "অর্ডার কনফিগারেশন",
-    targetUrlLabel: "টার্গেট লিংক / ইউজারনেম",
-    quantityLabel: "অর্ডার পরিমাণ (Quantity)",
+    orderFormTitle: "প্রোডাক্ট অর্ডার ফরম",
+    targetUrlLabel: "প্রয়োজনীয় তথ্য (যেমন: ইমেইল/ইউজার আইডি/লিংক)",
+    quantityLabel: "ক্রয় পরিমাণ (Quantity/Units)",
     additionalNote: "বিশেষ নির্দেশনা (অর্ডার নোট - ঐচ্ছিক)",
     estimatedPrice: "আনুমানিক মোট মূল্য:",
     calculatePrice: "হিসাব করুন",
     placeOrderBtn: "অর্ডারের জন্য এগিয়ে যান",
     orderLimitError: "পরিমাণ অবশ্যই %min% থেকে %max% এর মধ্যে হতে হবে।",
     walletBalanceError: "আপনার ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই! অনুগ্রহ করে ওয়ালেট রিচার্জ করুন।",
-    guestNotice: "আপনি গেস্ট হিসেবে অর্ডার করছেন। অর্ডার ট্র্যাকিংয়ের জন্য একটি ইমেইল প্রয়োজন।",
-    guestEmailLabel: "আপনার ইমেল অ্যাড্রেস",
+    guestNotice: "আপনি গেস্ট হিসেবে কিনছেন। প্রোডাক্ট ও লাইসেন্স কি ডেলিভারির জন্য ইমেইল আবশ্যক।",
+    guestEmailLabel: "আপনার সঠিক ইমেইল অ্যাড্রেস",
 
     // Checkout / Payment
     checkoutTitle: "অর্ডার নিশ্চিতকরণ ও পেমেন্ট",
@@ -204,14 +204,14 @@ export const translations = {
     adminNotificationBtn: "বিজ্ঞপ্তি পাঠান"
   },
   en: {
-    siteName: "Digital Follower & Link SaaS",
+    siteName: "Digital Gallery | Premium Subscriptions & Licenses",
     navHome: "Home",
-    navServices: "Services",
+    navServices: "Product Catalog",
     navCategories: "Categories",
     navTickets: "Support Tickets",
     navAffiliate: "Affiliate",
-    navBlog: "Blog & News",
-    navFaq: "FAQ & Contact",
+    navBlog: "Guides & Blogs",
+    navFaq: "FAQ & Support",
     navLogin: "Login",
     navRegister: "Register",
     navDashboard: "Dashboard",
@@ -220,27 +220,27 @@ export const translations = {
 
     // Bottom Sticky Navigation (Mobile)
     bottomHome: "Home",
-    bottomServices: "Services",
+    bottomServices: "Mart Store",
     bottomDashboard: "Profile",
     bottomTickets: "Support",
     bottomAdmin: "Admin",
 
     // Hero Section
-    heroTitlePre: "Accelerate Your Social Growth",
-    heroTitleHighlight: "With One Click!",
-    heroSubtitle: "High-quality, active and real social media followers, likes, views and link traffic at unbeatable rates, with instant starting and auto-dispatch.",
-    heroCtaServices: "Browse Services",
-    heroCtaDashboard: "Go to Dashboard",
+    heroTitlePre: "Premium Digital Products & Licenses",
+    heroTitleHighlight: "Delivered instantly!",
+    heroSubtitle: "Unlock original Windows Licenses, Netflix Subscriptions, Canva Premiums, Game Diamonds Top-up, and premium themes at unbeatable rates with secure automated delivery.",
+    heroCtaServices: "Browse Products",
+    heroCtaDashboard: "User Dashboard",
 
     // Stats
-    statCompletedOrders: "Delivered Orders",
+    statCompletedOrders: "Orders Delivered",
     statActiveUsers: "Happy Clients",
-    statServices: "Services Active",
-    statSupportTime: "Customer Support",
-    statInstantDelivery: "Instant Dispatch",
+    statServices: "Premium Items",
+    statSupportTime: "Live Support",
+    statInstantDelivery: "Instant Handover",
 
     // Live Ticker / Latest Activity
-    latestActivityTitle: "Live Customer Activity Ticker",
+    latestActivityTitle: "Live Activity Ticker",
     latestActivityOrder: "ID #%id% - %service% (%qty% units) - Status: %status%",
     activityStatusPending: "Pending",
     activityStatusProcessing: "Processing",
@@ -249,15 +249,15 @@ export const translations = {
 
     // Why Choose Us
     whyTitle: "Why Choose Us?",
-    whySubtitle: "We provide high fidelity, fast delivery, secure payment and 24/7 client care.",
-    whySec1Title: "Secure Transactions",
-    whySec1Desc: "Full support for local bKash, Nagad, Rocket alongside international gateways.",
-    whySec2Title: "Express Speed",
-    whySec2Desc: "Our modern order pipelines operate almost instantly in an automated fashion.",
-    whySec3Title: "24/7 Dedicated Support",
-    whySec3Desc: "Open a ticket on our interactive customer service and get verified help quickly.",
-    whySec4Title: "Best Value Rates",
-    whySec4Desc: "Ensured premium high-quality engagement profiles for incredibly competitive rates.",
+    whySubtitle: "We secure direct original licenses, zero-hassle delivery, and 24/7 dedicated assistance.",
+    whySec1Title: "Secure Payments",
+    whySec1Desc: "Fully integrated local bKash, Nagad, Rocket alongside other secure gateways.",
+    whySec2Title: "Express Dispatch",
+    whySec2Desc: "Our automated delivery pipes hand over licenses, keys and invitations instantly.",
+    whySec3Title: "24/7 Expert Helpdesk",
+    whySec3Desc: "Open an active support ticket and let our technicians assist with any key activation.",
+    whySec4Title: "Best Market Price",
+    whySec4Desc: "We fetch licenses in bulk directly from vendors to pass maximum savings to you.",
 
     // Promo & Announcements
     announcementLabel: "Announcement:",
@@ -274,28 +274,28 @@ export const translations = {
 
     // Services Pages
     categoriesTitle: "Available Categories",
-    categoriesSubtitle: "Select from our vast array of social and link metric categories",
-    servicesInCat: "Services under %cat%",
+    categoriesSubtitle: "Select from premium subscriptions, legitimate software keys, and gaming assets",
+    servicesInCat: "Products in %cat%",
     servicePrice: "Price:",
-    serviceMin: "Min Limit:",
-    serviceMax: "Max Limit:",
-    serviceDelivery: "Timeframe:",
-    orderNowBtn: "Order Now",
-    searchPlaceholder: "Search services...",
-    noServicesFound: "No matches found!",
+    serviceMin: "Min Units:",
+    serviceMax: "Max Units:",
+    serviceDelivery: "Handover Time:",
+    orderNowBtn: "Buy Now",
+    searchPlaceholder: "Search products...",
+    noServicesFound: "No products matched your search!",
 
     // Service Details & Order Form
-    orderFormTitle: "Order Configuration",
-    targetUrlLabel: "Target Link / Username",
+    orderFormTitle: "Product Configuration & Order",
+    targetUrlLabel: "Details (e.g. Player ID / Whatsapp No / Target Email)",
     quantityLabel: "Order Quantity",
     additionalNote: "Special instructions (Order Note - Optional)",
     estimatedPrice: "Estimated Cost:",
-    calculatePrice: "Calculate",
-    placeOrderBtn: "Proceed with Order",
+    calculatePrice: "Calculate Price",
+    placeOrderBtn: "Proceed to Checkout",
     orderLimitError: "Quantity must fall between %min% and %max%",
     walletBalanceError: "Insufficient funds in your digital wallet! Please top up.",
-    guestNotice: "Checking out as guest. Enter email for validation & service tracking.",
-    guestEmailLabel: "Your Email Address",
+    guestNotice: "Checking out as guest. Active email is required to deliver your keys or credentials.",
+    guestEmailLabel: "Your Contact Email Address",
 
     // Checkout / Payment
     checkoutTitle: "Confirmation & Secure Payment",
