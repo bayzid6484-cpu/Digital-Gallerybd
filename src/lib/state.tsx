@@ -62,9 +62,18 @@ interface StateContextType {
   editCategory: (id: string, c: Partial<Category>) => void;
   deleteCategory: (id: string) => void;
   addCoupon: (c: Coupon) => void;
+  editCoupon: (id: string, c: Partial<Coupon>) => void;
   deleteCoupon: (id: string) => void;
   addBlog: (b: Omit<Blog, 'id' | 'views' | 'createdAt'>) => void;
+  editBlog: (id: string, b: Partial<Blog>) => void;
   deleteBlog: (id: string) => void;
+  deleteUser: (id: string) => void;
+  editUser: (id: string, u: Partial<UserProfile>) => void;
+  deleteOrder: (id: string) => void;
+  editOrder: (id: string, o: Partial<Order>) => void;
+  deleteTransaction: (id: string) => void;
+  editTransaction: (id: string, tData: Partial<PaymentTransaction>) => void;
+  deleteSupportTicket: (id: string) => void;
 
   // Supabase Cloud Actions
   syncAllToSupabase: () => Promise<{ success: boolean; message: string }>;
@@ -539,7 +548,19 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // CRUD Coupon
   const addCoupon = (c: Coupon) => {
-    saveAndSet<Coupon[]>('seba_coupons', setCouponsState, (prev) => [...prev, c]);
+    saveAndSet<Coupon[]>('seba_coupons', setCouponsState, (prev) => {
+      const exists = prev.some(item => item.id === c.id);
+      if (exists) {
+        return prev.map(item => item.id === c.id ? { ...item, ...c } : item);
+      }
+      return [...prev, c];
+    });
+  };
+
+  const editCoupon = (id: string, cData: Partial<Coupon>) => {
+    saveAndSet<Coupon[]>('seba_coupons', setCouponsState, (prev) => 
+      prev.map(c => c.id === id ? { ...c, ...cData } : c)
+    );
   };
 
   const deleteCoupon = (id: string) => {
@@ -557,8 +578,60 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     saveAndSet<Blog[]>('seba_blogs', setBlogsState, (prev) => [b, ...prev]);
   };
 
+  const editBlog = (id: string, bData: Partial<Blog>) => {
+    saveAndSet<Blog[]>('seba_blogs', setBlogsState, (prev) => 
+      prev.map(b => b.id === id ? { ...b, ...bData } : b)
+    );
+  };
+
   const deleteBlog = (id: string) => {
     saveAndSet<Blog[]>('seba_blogs', setBlogsState, (prev) => prev.filter(b => b.id !== id));
+  };
+
+  // CRUD Users
+  const deleteUser = (id: string) => {
+    saveAndSet<UserProfile[]>('seba_users', setUsersState, (prev) => prev.filter(u => u.id !== id));
+  };
+
+  const editUser = (id: string, uData: Partial<UserProfile>) => {
+    saveAndSet<UserProfile[]>('seba_users', setUsersState, (prev) => {
+      const rawUsers = prev.map(u => u.id === id ? { ...u, ...uData } : u);
+      if (currentUser && currentUser.id === id) {
+        const updated = rawUsers.find(u => u.id === id);
+        if (updated) {
+          setCurrentUserState(updated);
+          localStorage.setItem('seba_current_user', JSON.stringify(updated));
+        }
+      }
+      return rawUsers;
+    });
+  };
+
+  // CRUD Orders
+  const deleteOrder = (id: string) => {
+    saveAndSet<Order[]>('seba_orders', setOrdersState, (prev) => prev.filter(o => o.id !== id));
+  };
+
+  const editOrder = (id: string, oData: Partial<Order>) => {
+    saveAndSet<Order[]>('seba_orders', setOrdersState, (prev) => 
+      prev.map(o => o.id === id ? { ...o, ...oData } : o)
+    );
+  };
+
+  // CRUD Transactions
+  const deleteTransaction = (id: string) => {
+    saveAndSet<PaymentTransaction[]>('seba_transactions', setTransactionsState, (prev) => prev.filter(t => t.id !== id));
+  };
+
+  const editTransaction = (id: string, tData: Partial<PaymentTransaction>) => {
+    saveAndSet<PaymentTransaction[]>('seba_transactions', setTransactionsState, (prev) => 
+      prev.map(t => t.id === id ? { ...t, ...tData } : t)
+    );
+  };
+
+  // CRUD Support Tickets
+  const deleteSupportTicket = (id: string) => {
+    saveAndSet<SupportTicket[]>('seba_tickets', setTicketsState, (prev) => prev.filter(t => t.id !== id));
   };
 
   // Notifications
@@ -638,9 +711,18 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       editCategory,
       deleteCategory,
       addCoupon,
+      editCoupon,
       deleteCoupon,
       addBlog,
+      editBlog,
       deleteBlog,
+      deleteUser,
+      editUser,
+      deleteOrder,
+      editOrder,
+      deleteTransaction,
+      editTransaction,
+      deleteSupportTicket,
       syncAllToSupabase,
       isCloudLoading
     }}>

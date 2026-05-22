@@ -5,14 +5,15 @@ import {
   Settings, DollarSign, ListOrdered, ClipboardList, HelpCircle, AlertCircle, Plus, Send, Edit3,
   Users, Percent, FileText, RefreshCw, Save, Check, UserCheck, Shield, Bookmark, Globe
 } from 'lucide-react';
-import { Category, Service, Coupon, SupportTicket, Blog, UserProfile } from '../types';
+import { Category, Service, Coupon, SupportTicket, Blog, UserProfile, Order, PaymentTransaction } from '../types';
 
 export const AdminDashboard: React.FC = () => {
   const { 
     currentUser, orders, transactions, tickets, categories, services, settings, coupons, users, blogs, notifications,
     updateSettings, approvePayment, rejectPayment, updateOrderStatus, replyToTicket, updateTicketStatus,
-    addService, editService, deleteService, addCategory, editCategory, deleteCategory, addCoupon, deleteCoupon,
-    addBlog, deleteBlog, syncAllToSupabase, isCloudLoading, updateUserBalance, updateUserRole, addNotification, lang, t
+    addService, editService, deleteService, addCategory, editCategory, deleteCategory, addCoupon, editCoupon, deleteCoupon,
+    addBlog, editBlog, deleteBlog, syncAllToSupabase, isCloudLoading, updateUserBalance, updateUserRole,
+    deleteUser, editUser, deleteOrder, editOrder, deleteTransaction, editTransaction, deleteSupportTicket, addNotification, lang, t
   } = useAppState();
 
   const [activeAdminSec, setActiveAdminSec] = useState<'analytics' | 'deposits' | 'orders' | 'services' | 'settings' | 'tickets' | 'users' | 'coupons_blogs'>('analytics');
@@ -81,6 +82,35 @@ export const AdminDashboard: React.FC = () => {
 
   // User search query
   const [userSearchText, setUserSearchText] = useState('');
+
+  // ------- TARGET ACTION & DETAILS EDITING STATES -------
+  const [editingCouponId, setEditingCouponId] = useState<string | null>(null);
+  const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
+
+  // Users
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editUsrName, setEditUsrName] = useState('');
+  const [editUsrEmail, setEditUsrEmail] = useState('');
+  const [editUsrCode, setEditUsrCode] = useState('');
+  const [editUsrRole, setEditUsrRole] = useState<'user' | 'admin'>('user');
+  const [editUsrBalance, setEditUsrBalance] = useState<number>(0);
+
+  // Orders
+  const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+  const [editOrdLink, setEditOrdLink] = useState('');
+  const [editOrdQty, setEditOrdQty] = useState<number>(0);
+  const [editOrdPrice, setEditOrdPrice] = useState<number>(0);
+  const [editOrdStatus, setEditOrdStatus] = useState<Order['status']>('pending');
+
+  // Transactions
+  const [editingTransactionId, setEditingTransactionId] = useState<string | null>(null);
+  const [editTxAmount, setEditTxAmount] = useState<number>(0);
+  const [editTxMethod, setEditTxMethod] = useState('');
+  const [editTxSender, setEditTxSender] = useState('');
+  const [editTxId, setEditTxId] = useState('');
+  const [editTxType, setEditTxType] = useState<'deposit' | 'checkout'>('deposit');
+  const [editTxStatus, setEditTxStatus] = useState<PaymentTransaction['status']>('pending');
+  const [editTxNote, setEditTxNote] = useState('');
 
   if (!currentUser || currentUser.role !== 'admin') {
     return (
@@ -226,19 +256,40 @@ export const AdminDashboard: React.FC = () => {
     e.preventDefault();
     if (!cpCode || cpDiscount <= 0) return;
 
-    const newCp: Coupon = {
-      id: `cp-${Math.floor(1000 + Math.random() * 9000)}`,
-      code: cpCode.toUpperCase().trim(),
-      discountPercent: cpDiscount,
-      minOrderAmount: cpMinOrder,
-      expiryDate: cpExpiry || '2026-12-31',
-      active: true
-    };
+    if (editingCouponId) {
+      editCoupon(editingCouponId, {
+        code: cpCode.toUpperCase().trim(),
+        discountPercent: cpDiscount,
+        minOrderAmount: cpMinOrder,
+        expiryDate: cpExpiry
+      });
+      alert('Promo coupon updated successfully!');
+      setEditingCouponId(null);
+    } else {
+      const newCp: Coupon = {
+        id: `cp-${Math.floor(1000 + Math.random() * 9000)}`,
+        code: cpCode.toUpperCase().trim(),
+        discountPercent: cpDiscount,
+        minOrderAmount: cpMinOrder,
+        expiryDate: cpExpiry || '2026-12-31',
+        active: true
+      };
+      addCoupon(newCp);
+      alert('Promo coupon added successfully!');
+    }
 
-    addCoupon(newCp);
-    alert('Promo coupon added successfully!');
     setCpCode('');
     setCpDiscount(10);
+    setCpMinOrder(200);
+    setCpExpiry('2026-12-31');
+  };
+
+  const loadCouponToEdit = (cp: Coupon) => {
+    setEditingCouponId(cp.id);
+    setCpCode(cp.code);
+    setCpDiscount(cp.discountPercent);
+    setCpMinOrder(cp.minOrderAmount);
+    setCpExpiry(cp.expiryDate);
   };
 
   // CRUD Blogs triggers
@@ -249,7 +300,7 @@ export const AdminDashboard: React.FC = () => {
       return;
     }
 
-    addBlog({
+    const payload = {
       titleBn: blogTitleBn,
       titleEn: blogTitleEn,
       contentBn: blogContentBn,
@@ -257,13 +308,106 @@ export const AdminDashboard: React.FC = () => {
       categoryBn: blogCatBn,
       categoryEn: blogCatEn,
       imageUrl: blogImg || 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=600'
-    });
+    };
 
-    alert('Guide blog published to public views successfully!');
+    if (editingBlogId) {
+      editBlog(editingBlogId, payload);
+      alert('Guide blog updated successfully!');
+      setEditingBlogId(null);
+    } else {
+      addBlog(payload);
+      alert('Guide blog published to public views successfully!');
+    }
+
     setBlogTitleBn('');
     setBlogTitleEn('');
     setBlogContentBn('');
     setBlogContentEn('');
+  };
+
+  const loadBlogToEdit = (b: Blog) => {
+    setEditingBlogId(b.id);
+    setBlogTitleBn(b.titleBn);
+    setBlogTitleEn(b.titleEn);
+    setBlogContentBn(b.contentBn);
+    setBlogContentEn(b.contentEn);
+    setBlogCatBn(b.categoryBn);
+    setBlogCatEn(b.categoryEn);
+    setBlogImg(b.imageUrl);
+  };
+
+  // CRUD User details triggers
+  const handleEditUserSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUserId) return;
+    editUser(editingUserId, {
+      name: editUsrName,
+      email: editUsrEmail,
+      referralCode: editUsrCode,
+      role: editUsrRole,
+      walletBalance: Number(editUsrBalance)
+    });
+    alert('Client profile changed successfully!');
+    setEditingUserId(null);
+  };
+
+  const loadUserToEdit = (user: UserProfile) => {
+    setEditingUserId(user.id);
+    setEditUsrName(user.name);
+    setEditUsrEmail(user.email);
+    setEditUsrCode(user.referralCode);
+    setEditUsrRole(user.role);
+    setEditUsrBalance(user.walletBalance);
+  };
+
+  // CRUD Order details triggers
+  const handleEditOrderSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingOrderId) return;
+    editOrder(editingOrderId, {
+      targetLink: editOrdLink,
+      quantity: Number(editOrdQty),
+      totalPrice: Number(editOrdPrice),
+      status: editOrdStatus
+    });
+    alert('SMM order details altered successfully!');
+    setEditingOrderId(null);
+  };
+
+  const loadOrderToEdit = (ord: Order) => {
+    setEditingOrderId(ord.id);
+    setEditOrdLink(ord.targetLink);
+    setEditOrdQty(ord.quantity);
+    setEditOrdPrice(ord.totalPrice);
+    setEditOrdStatus(ord.status);
+  };
+
+  // CRUD Transaction triggers
+  const handleEditTransactionSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTransactionId) return;
+    editTransaction(editingTransactionId, {
+      amount: Number(editTxAmount),
+      method: editTxMethod,
+      senderNumber: editTxSender,
+      transactionId: editTxId,
+      type: editTxType,
+      status: editTxStatus,
+      note: editTxNote
+    });
+    alert('Deposit/transaction file modified successfully!');
+    setEditingTransactionId(null);
+  };
+
+  const loadTransactionToEdit = (tx: PaymentTransaction) => {
+    setEditingTransactionId(tx.id);
+    setEditTxAmount(tx.amount);
+    setEditTxMethod(tx.method);
+    setEditTxSender(tx.senderNumber || '');
+    setEditTxId(tx.transactionId || '');
+    setEditTxType(tx.type);
+    setEditTxStatus(tx.status);
+    setEditTxNote(tx.note || '');
   };
 
   // Save Site settings
@@ -486,7 +630,105 @@ export const AdminDashboard: React.FC = () => {
 
       {/* SEC 2: MANAGE MANUAL DEPOSITS (PAYMENTS) */}
       {activeAdminSec === 'deposits' && (
-        <section id="deposit-auditer-panel" className="space-y-4">
+        <section id="deposit-auditer-panel" className="space-y-8">
+          
+          {/* Edit Transaction Form Modal if active */}
+          {editingTransactionId && (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 dark:bg-gray-900 dark:border-amber-900 space-y-4 text-black dark:text-white">
+              <div className="flex items-center justify-between border-b pb-2 border-amber-200">
+                <h4 className="font-bold text-amber-800 dark:text-amber-300 text-sm">
+                  ✏️ Edit Transaction Details: {editingTransactionId}
+                </h4>
+                <button 
+                  onClick={() => setEditingTransactionId(null)}
+                  className="text-xs text-rose-500 underline font-mono font-bold cursor-pointer"
+                >
+                  CANCEL
+                </button>
+              </div>
+              <form onSubmit={handleEditTransactionSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs font-semibold">
+                <div className="space-y-1">
+                  <label className="text-gray-500 block">Amount ({settings.currencySymbol})</label>
+                  <input 
+                    type="number"
+                    required
+                    value={editTxAmount}
+                    onChange={(e) => setEditTxAmount(Number(e.target.value))}
+                    className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-500 block">Method</label>
+                  <input 
+                    type="text"
+                    required
+                    value={editTxMethod}
+                    onChange={(e) => setEditTxMethod(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-500 block">Sender Number</label>
+                  <input 
+                    type="text"
+                    value={editTxSender}
+                    onChange={(e) => setEditTxSender(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-500 block">TrxID / Code</label>
+                  <input 
+                    type="text"
+                    value={editTxId}
+                    onChange={(e) => setEditTxId(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:text-white font-mono"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-500 block">Type</label>
+                  <select
+                    value={editTxType}
+                    onChange={(e) => setEditTxType(e.target.value as 'deposit' | 'checkout')}
+                    className="w-full p-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
+                  >
+                    <option value="deposit">Deposit (Inflow)</option>
+                    <option value="checkout">Checkout (Outflow)</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-500 block">Status</label>
+                  <select
+                    value={editTxStatus}
+                    onChange={(e) => setEditTxStatus(e.target.value as any)}
+                    className="w-full p-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-gray-500 block">Admin Note</label>
+                  <input 
+                    type="text"
+                    value={editTxNote}
+                    onChange={(e) => setEditTxNote(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+                <div className="md:col-span-4 flex justify-end">
+                  <button 
+                    type="submit"
+                    className="bg-emerald-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-emerald-700 cursor-pointer"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+          
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-gray-900 dark:text-white text-base">
               {lang === 'bn' ? 'গ্রাহকদের পেমেন্ট এবং ওয়ালেট টপআপ তালিকা' : 'Deposit approvals & wallet audits'}
@@ -531,6 +773,86 @@ export const AdminDashboard: React.FC = () => {
               ))}
             </div>
           )}
+
+          {/* All transactions history rendering block */}
+          <div className="bg-white border border-gray-150 rounded-2xl p-6 dark:bg-gray-800 dark:border-gray-700 space-y-4">
+            <div className="flex items-center justify-between border-b pb-2">
+              <h4 className="font-bold text-gray-950 dark:text-white text-base">
+                📊 All Transactions History ({transactions.length})
+              </h4>
+              <span className="text-[10.5px] bg-slate-100 dark:bg-slate-750 px-2 py-0.5 rounded font-bold uppercase text-slate-500">
+                Data Manager
+              </span>
+            </div>
+
+            <div className="overflow-x-auto rounded-xl border border-gray-150">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-gray-50 dark:bg-gray-750 text-gray-700 font-bold border-b text-[11px] uppercase dark:text-gray-300">
+                    <th className="p-3">TRX-ID / User</th>
+                    <th className="p-3">Amount</th>
+                    <th className="p-3">Gateway / Sender</th>
+                    <th className="p-3">Type</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y font-medium text-gray-800 dark:text-gray-200">
+                  {transactions.map((tx) => (
+                    <tr key={tx.id} className="hover:bg-slate-50/40">
+                      <td className="p-3 font-mono">
+                        <p className="font-bold">{tx.id}</p>
+                        <p className="text-[10px] text-gray-400">User: {tx.userId}</p>
+                      </td>
+                      <td className="p-3 font-mono text-sm text-indigo-600 font-black dark:text-indigo-400">
+                        {settings.currencySymbol}{tx.amount}
+                      </td>
+                      <td className="p-3">
+                        <p className="font-semibold">{tx.method}</p>
+                        <p className="text-[10px] text-gray-400 font-mono">
+                          TRX: {tx.transactionId || 'N/A'} • SEND: {tx.senderNumber || 'N/A'}
+                        </p>
+                      </td>
+                      <td className="p-3">
+                        <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold ${
+                          tx.type === 'deposit' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+                        }`}>
+                          {tx.type}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold ${
+                          tx.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : tx.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
+                        }`}>
+                          {tx.status}
+                        </span>
+                      </td>
+                      <td className="p-3 text-right">
+                        <div className="flex justify-end gap-1.5">
+                          <button
+                            onClick={() => loadTransactionToEdit(tx)}
+                            className="bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-600 px-2.5 py-1 rounded text-[10px] font-bold cursor-pointer"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (confirm('Delete this transaction record forever?')) {
+                                deleteTransaction(tx.id);
+                              }
+                            }}
+                            className="bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-600 p-1.5 rounded cursor-pointer"
+                          >
+                            <Trash className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </section>
       )}
 
@@ -540,6 +862,78 @@ export const AdminDashboard: React.FC = () => {
           <h3 className="font-bold text-gray-900 dark:text-white text-base">
             {lang === 'bn' ? 'অর্ডার প্রসেসিং ও ডেলিভারি আপডেট প্যানেল' : 'Live Order tracking & delivery states manager'}
           </h3>
+
+          {/* Edit Order Form Modal */}
+          {editingOrderId && (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 dark:bg-gray-900 dark:border-amber-900 space-y-4 text-black dark:text-white text-xs">
+              <div className="flex items-center justify-between border-b pb-2 border-amber-200">
+                <h4 className="font-bold text-amber-800 dark:text-amber-300 text-sm">
+                  ✏️ Edit SMM Order Details: {editingOrderId}
+                </h4>
+                <button 
+                  onClick={() => setEditingOrderId(null)}
+                  className="text-xs text-rose-500 underline font-mono font-bold cursor-pointer"
+                >
+                  CANCEL
+                </button>
+              </div>
+              <form onSubmit={handleEditOrderSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 font-semibold">
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-gray-500 block">Target URL link</label>
+                  <input 
+                    type="url"
+                    required
+                    value={editOrdLink}
+                    onChange={(e) => setEditOrdLink(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-500 block">Quantity ordered</label>
+                  <input 
+                    type="number"
+                    required
+                    value={editOrdQty}
+                    onChange={(e) => setEditingOrderId ? setEditOrdQty(Number(e.target.value)) : null}
+                    className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-500 block">Total Price ({settings.currencySymbol})</label>
+                  <input 
+                    type="number"
+                    step="0.01"
+                    required
+                    value={editOrdPrice}
+                    onChange={(e) => setEditOrdPrice(Number(e.target.value))}
+                    className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-500 block">Order Status</label>
+                  <select
+                    value={editOrdStatus}
+                    onChange={(e) => setEditOrdStatus(e.target.value as any)}
+                    className="w-full p-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="refunded">Refunded</option>
+                  </select>
+                </div>
+                <div className="md:col-span-4 flex justify-end">
+                  <button 
+                    type="submit"
+                    className="bg-emerald-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-emerald-700 cursor-pointer text-xs"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
 
           <div className="overflow-x-auto rounded-xl border border-gray-150 bg-white dark:bg-gray-800 dark:border-gray-700">
             <table className="w-full text-left border-collapse text-xs">
@@ -564,36 +958,52 @@ export const AdminDashboard: React.FC = () => {
                     <td className="p-3 font-mono">{settings.currencySymbol}{ord.totalPrice}</td>
                     <td className="p-3">
                       <span className={`px-2 py-0.5 rounded-full font-bold text-[9px] uppercase ${
-                        ord.status === 'completed' ? 'bg-emerald-50 text-emerald-700' : ord.status === 'pending' ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-500'
+                        ord.status === 'completed' ? 'bg-emerald-50 text-emerald-700' : ord.status === 'pending' ? 'bg-amber-50 text-amber-600' : ord.status === 'cancelled' ? 'bg-rose-50 text-rose-600' : ord.status === 'refunded' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-700'
                       }`}>
                         {ord.status}
                       </span>
                     </td>
                     <td className="p-3 text-right">
-                      <div className="flex justify-end gap-1.5 flex-wrap">
+                      <div className="flex justify-end gap-1 flex-wrap max-w-[280px] ml-auto">
                         <button
                           onClick={() => updateOrderStatus(ord.id, 'processing')}
-                          className="bg-indigo-50 hover:bg-slate-100 border border-indigo-200 text-indigo-600 font-bold text-[9px] py-1 px-2 rounded cursor-pointer transition-colors"
+                          className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-600 font-bold text-[9px] py-1 px-1.5 rounded cursor-pointer transition-colors"
                         >
                           Process
                         </button>
                         <button
                           onClick={() => updateOrderStatus(ord.id, 'completed')}
-                          className="bg-emerald-50 hover:bg-slate-100 border border-emerald-200 text-emerald-600 font-bold text-[9px] py-1 px-2 rounded cursor-pointer transition-colors"
+                          className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-600 font-bold text-[9px] py-1 px-1.5 rounded cursor-pointer transition-colors"
                         >
                           Complete
                         </button>
                         <button
                           onClick={() => updateOrderStatus(ord.id, 'cancelled')}
-                          className="bg-rose-50 hover:bg-red-100 border border-rose-200 text-rose-500 font-bold text-[9px] py-1 px-2 rounded cursor-pointer transition-colors"
+                          className="bg-rose-50 hover:bg-red-100 border border-rose-200 text-rose-500 font-bold text-[9px] py-1 px-1.5 rounded cursor-pointer transition-colors"
                         >
                           Cancel
                         </button>
                         <button
                           onClick={() => updateOrderStatus(ord.id, 'refunded')}
-                          className="bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-600 font-bold text-[9px] py-1 px-2 rounded cursor-pointer transition-colors"
+                          className="bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-600 font-bold text-[9px] py-1 px-1.5 rounded cursor-pointer transition-colors"
                         >
                           Refund
+                        </button>
+                        <button
+                          onClick={() => loadOrderToEdit(ord)}
+                          className="bg-slate-100 hover:bg-slate-200 border border-slate-355 text-slate-700 font-bold text-[9px] py-1 px-2 rounded cursor-pointer transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this SMM order record?')) {
+                              deleteOrder(ord.id);
+                            }
+                          }}
+                          className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-[9px] p-1 rounded cursor-pointer transition-colors"
+                        >
+                          <Trash className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </td>
@@ -949,15 +1359,94 @@ export const AdminDashboard: React.FC = () => {
             />
           </div>
 
+          {/* Edit User Form Panel if activated */}
+          {editingUserId && (
+            <div className="bg-indigo-50/70 border border-indigo-200 rounded-2xl p-5 dark:bg-gray-900 dark:border-indigo-950 space-y-4 text-xs text-slate-800 dark:text-white">
+              <div className="flex items-center justify-between border-b pb-2 border-indigo-200">
+                <h4 className="font-bold text-indigo-800 dark:text-indigo-300 text-sm">
+                  ✏️ Edit Client Profile details: {editingUserId}
+                </h4>
+                <button 
+                  onClick={() => setEditingUserId(null)}
+                  className="text-xs text-rose-500 underline font-mono font-bold cursor-pointer"
+                >
+                  CANCEL
+                </button>
+              </div>
+              <form onSubmit={handleEditUserSubmit} className="grid grid-cols-1 md:grid-cols-5 gap-4 font-semibold">
+                <div className="space-y-1">
+                  <label className="text-gray-500 block">Full Name</label>
+                  <input 
+                    type="text"
+                    required
+                    value={editUsrName}
+                    onChange={(e) => setEditUsrName(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-750 dark:text-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-500 block">Email Address</label>
+                  <input 
+                    type="email"
+                    required
+                    value={editUsrEmail}
+                    onChange={(e) => setEditUsrEmail(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-750 dark:text-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-500 block">Referral Code</label>
+                  <input 
+                    type="text"
+                    required
+                    value={editUsrCode}
+                    onChange={(e) => setEditUsrCode(e.target.value.toUpperCase())}
+                    className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-750 dark:text-white font-mono"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-500 block">Wallet Balance ({settings.currencySymbol})</label>
+                  <input 
+                    type="number"
+                    step="0.01"
+                    required
+                    value={editUsrBalance}
+                    onChange={(e) => setEditUsrBalance(Number(e.target.value))}
+                    className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-750 dark:text-white font-mono"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-500 block">Clearance Role</label>
+                  <select
+                    value={editUsrRole}
+                    onChange={(e) => setEditUsrRole(e.target.value as 'user' | 'admin')}
+                    className="w-full p-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-750 dark:text-white"
+                  >
+                    <option value="user">User / Customer</option>
+                    <option value="admin">Admin / Moderator</option>
+                  </select>
+                </div>
+                <div className="md:col-span-5 flex justify-end">
+                  <button 
+                    type="submit"
+                    className="bg-indigo-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-indigo-700 cursor-pointer"
+                  >
+                    Save Profile Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
           <div className="overflow-x-auto rounded-xl border">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-gray-50 text-gray-700 font-bold border-b text-[11px] uppercase dark:bg-gray-750 dark:text-gray-300">
+                <tr className="bg-gray-50 text-gray-700 font-bold border-b text-[11px] uppercase dark:bg-gray-750 dark:text-gray-300 font-sans">
                   <th className="p-3">Client profile</th>
                   <th className="p-3">Clearance Access</th>
                   <th className="p-3">Ref ID CODE</th>
                   <th className="p-3">WALLET BALANCE</th>
-                  <th className="p-3">RECHARGE ACTION</th>
+                  <th className="p-3 font-semibold text-center">MANAGE CONTROLS</th>
                   <th className="p-3 text-right">ROLE SETTINGS</th>
                 </tr>
               </thead>
@@ -965,7 +1454,7 @@ export const AdminDashboard: React.FC = () => {
                 {searchedUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-slate-50/40">
                     <td className="p-3">
-                      <p className="font-bold">{user.name}</p>
+                      <p className="font-bold text-gray-900 dark:text-white">{user.name}</p>
                       <p className="text-[10px] text-gray-400 font-mono">{user.email} • ID: {user.id}</p>
                     </td>
                     <td className="p-3">
@@ -976,38 +1465,62 @@ export const AdminDashboard: React.FC = () => {
                       </span>
                     </td>
                     <td className="p-3 font-mono font-bold text-gray-500">{user.referralCode}</td>
-                    <td className="p-3 font-mono text-emerald-600 text-sm font-bold">
+                    <td className="p-3 font-mono text-emerald-600 text-sm font-bold dark:text-emerald-400">
                       {settings.currencySymbol}{user.walletBalance.toFixed(2)}
                     </td>
-                    <td className="p-3">
-                      {userIdToTopup === user.id ? (
-                        <form onSubmit={(e) => handleAdjustBalance(user.id, e)} className="flex items-center gap-1">
-                          <input
-                            type="number"
-                            required
-                            placeholder="Amount (e.g. 500 or -100)"
-                            value={topupAmount}
-                            onChange={(e) => setTopupAmount(Number(e.target.value))}
-                            className="w-24 px-2 py-1 text-xs border rounded bg-white dark:bg-gray-900"
-                          />
-                          <button type="submit" className="bg-emerald-500 text-white font-bold p-1 px-2 rounded text-[10px]">
-                            Apply
-                          </button>
-                          <button onClick={() => setUserIdToTopup(null)} className="text-[10px] text-rose-500 underline uppercase ml-1">
-                            Cancel
-                          </button>
-                        </form>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setUserIdToTopup(user.id);
-                            setTopupAmount(100);
-                          }}
-                          className="bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-600 px-2.5 py-1 rounded text-[10px] font-bold transition-colors cursor-pointer"
-                        >
-                          💸 Recharge BDT
-                        </button>
-                      )}
+                    <td className="p-3 text-center">
+                      <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                        {userIdToTopup === user.id ? (
+                          <form onSubmit={(e) => handleAdjustBalance(user.id, e)} className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              required
+                              placeholder="e.g. 500"
+                              value={topupAmount}
+                              onChange={(e) => setTopupAmount(Number(e.target.value))}
+                              className="w-16 px-1.5 py-1 text-[11px] border border-gray-300 rounded bg-white dark:bg-gray-900"
+                            />
+                            <button type="submit" className="bg-emerald-500 text-white font-bold p-1 px-2 rounded text-[10px] cursor-pointer">
+                              Apply
+                            </button>
+                            <button onClick={() => setUserIdToTopup(null)} className="text-[10px] text-rose-500 underline uppercase ml-1 cursor-pointer font-bold">
+                              Cancel
+                            </button>
+                          </form>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => {
+                                setUserIdToTopup(user.id);
+                                setTopupAmount(100);
+                              }}
+                              className="bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-600 px-2 py-1 rounded text-[10px] font-bold transition-colors cursor-pointer"
+                            >
+                              💸 Recharge
+                            </button>
+
+                            <button
+                              onClick={() => loadUserToEdit(user)}
+                              className="bg-amber-50 border border-amber-200 hover:bg-amber-100 text-amber-700 px-2 py-1 rounded text-[10px] font-bold transition-colors cursor-pointer"
+                            >
+                              ✏️ Edit
+                            </button>
+
+                            {user.email !== currentUser.email && (
+                              <button
+                                onClick={() => {
+                                  if (confirm(`Delete the user account of ${user.name} and clear from local database files?`)) {
+                                    deleteUser(user.id);
+                                  }
+                                }}
+                                className="bg-rose-50 border border-rose-200 hover:bg-rose-105 text-rose-600 p-1 rounded cursor-pointer"
+                              >
+                                <Trash className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </td>
                     <td className="p-3 text-right">
                       {user.email !== currentUser.email ? (
@@ -1015,7 +1528,7 @@ export const AdminDashboard: React.FC = () => {
                           onClick={() => handleToggleUserAdminRole(user)}
                           className="text-[9px] font-bold uppercase transition-colors px-2 py-1 rounded border border-gray-300 hover:bg-gray-100 cursor-pointer"
                         >
-                          Toggle Admin
+                          Toggle Role
                         </button>
                       ) : (
                         <span className="text-[10px] text-gray-400 italic">Self Account</span>
@@ -1031,7 +1544,7 @@ export const AdminDashboard: React.FC = () => {
 
       {/* SEC 6: PROMO COUPONS & BLOG CATALOG CRUD */}
       {activeAdminSec === 'coupons_blogs' && (
-        <section id="custom-promo-blogs-workspace" className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+        <section id="custom-promo-blogs-workspace" className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start text-black dark:text-white">
           
           {/* Coupon creation and listing panel */}
           <div className="md:col-span-5 bg-white border border-gray-150 rounded-2xl p-5 dark:bg-gray-800 dark:border-gray-700 space-y-5">
@@ -1041,15 +1554,33 @@ export const AdminDashboard: React.FC = () => {
             </h3>
 
             <form onSubmit={handleCreateCoupon} className="space-y-3.5 pt-1">
+              {editingCouponId && (
+                <div className="flex items-center justify-between text-[11px] bg-amber-50 dark:bg-gray-900 p-2 rounded border border-amber-200">
+                  <span className="font-bold text-amber-700">✏️ Editing Coupon: {editingCouponId}</span>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setEditingCouponId(null);
+                      setCpCode('');
+                      setCpDiscount(10);
+                      setCpMinOrder(200);
+                    }}
+                    className="text-rose-500 underline font-semibold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+
               <div className="space-y-1">
-                <label className="block text-[10px] uppercase text-gray-400 font-mono font-bold">New Coupon Code</label>
+                <label className="block text-[10px] uppercase text-gray-400 font-mono font-bold">Coupon Code</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. OFF40"
                   value={cpCode}
                   onChange={(e) => setCpCode(e.target.value)}
-                  className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg dark:bg-gray-900"
+                  className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                 />
               </div>
 
@@ -1061,7 +1592,7 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={cpDiscount}
                     onChange={(e) => setCpDiscount(Number(e.target.value))}
-                    className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg dark:bg-gray-900"
+                    className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                   />
                 </div>
                 <div className="space-y-1">
@@ -1071,40 +1602,48 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={cpMinOrder}
                     onChange={(e) => setCpMinOrder(Number(e.target.value))}
-                    className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg dark:bg-gray-900"
+                    className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg text-xs uppercase transition-colors flex justify-center items-center gap-1"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg text-xs uppercase transition-colors flex justify-center items-center gap-1 cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Create Promo coupon</span>
+                {editingCouponId ? <Save className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                <span>{editingCouponId ? 'Save Promo Coupon' : 'Create Promo Coupon'}</span>
               </button>
             </form>
 
-            <hr className="border-gray-100" />
+            <hr className="border-gray-100 dark:border-gray-700" />
 
             <div className="space-y-2">
               <h4 className="font-bold text-xs uppercase text-slate-400">Active promo listing ({coupons.length})</h4>
               <div className="space-y-2 max-h-[200px] overflow-y-auto">
                 {coupons.map((cp) => (
-                  <div key={cp.id} className="p-2.5 bg-gray-50 border border-gray-150 rounded-xl flex items-center justify-between text-xs dark:bg-gray-900">
+                  <div key={cp.id} className="p-2.5 bg-gray-50 border border-gray-150 rounded-xl flex items-center justify-between text-xs dark:bg-gray-900 dark:border-gray-750">
                     <div>
-                      <p className="font-bold font-mono text-indigo-600 text-sm leading-none">{cp.code}</p>
+                      <p className="font-bold font-mono text-indigo-600 dark:text-indigo-400 text-sm leading-none">{cp.code}</p>
                       <p className="text-[10px] text-gray-400 font-mono mt-1">
                         GET {cp.discountPercent}% OFF • MIN: {settings.currencySymbol}{cp.minOrderAmount} BDT
                       </p>
                     </div>
 
-                    <button
-                      onClick={() => deleteCoupon(cp.id)}
-                      className="p-1 px-1.5 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-lg cursor-pointer"
-                    >
-                      <Trash className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => loadCouponToEdit(cp)}
+                        className="p-1 px-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded text-[10px] font-bold cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteCoupon(cp.id)}
+                        className="p-1 px-1.5 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-lg cursor-pointer"
+                      >
+                        <Trash className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1119,6 +1658,25 @@ export const AdminDashboard: React.FC = () => {
             </h3>
 
             <form onSubmit={handleCreateBlog} className="space-y-3 pt-1">
+              {editingBlogId && (
+                <div className="flex items-center justify-between text-[11px] bg-amber-50 dark:bg-gray-900 p-2 rounded border border-amber-200">
+                  <span className="font-bold text-amber-700">✏️ Editing SMM Guide Article: {editingBlogId}</span>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setEditingBlogId(null);
+                      setBlogTitleBn('');
+                      setBlogTitleEn('');
+                      setBlogContentBn('');
+                      setBlogContentEn('');
+                    }}
+                    className="text-rose-500 underline font-semibold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="block text-[10px] text-gray-400 font-semibold">Title (English)</label>
@@ -1128,7 +1686,7 @@ export const AdminDashboard: React.FC = () => {
                     placeholder="Grow Facebook Likes..."
                     value={blogTitleEn}
                     onChange={(e) => setBlogTitleEn(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs border rounded-lg dark:bg-gray-900"
+                    className="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg dark:bg-gray-900 dark:border-gray-750 dark:text-white"
                   />
                 </div>
                 <div className="space-y-1">
@@ -1139,7 +1697,7 @@ export const AdminDashboard: React.FC = () => {
                     placeholder="পেইজ লাইক বাড়ানোর কৌশল..."
                     value={blogTitleBn}
                     onChange={(e) => setBlogTitleBn(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs border rounded-lg dark:bg-gray-900"
+                    className="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg dark:bg-gray-900 dark:border-gray-750 dark:text-white"
                   />
                 </div>
 
@@ -1151,7 +1709,7 @@ export const AdminDashboard: React.FC = () => {
                     placeholder="Write details content..."
                     value={blogContentEn}
                     onChange={(e) => setBlogContentEn(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs border rounded-lg dark:bg-gray-900"
+                    className="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg dark:bg-gray-900 dark:border-gray-750 dark:text-white"
                   />
                 </div>
 
@@ -1163,7 +1721,7 @@ export const AdminDashboard: React.FC = () => {
                     placeholder="বিস্তারিত বাংলা রিচ টেক্সট দিন..."
                     value={blogContentBn}
                     onChange={(e) => setBlogContentBn(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs border rounded-lg dark:bg-gray-900"
+                    className="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg dark:bg-gray-900 dark:border-gray-750 dark:text-white"
                   />
                 </div>
 
@@ -1173,7 +1731,7 @@ export const AdminDashboard: React.FC = () => {
                     type="text"
                     value={blogImg}
                     onChange={(e) => setBlogImg(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs border rounded-lg dark:bg-gray-900"
+                    className="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg dark:bg-gray-900 dark:border-gray-750 dark:text-white"
                   />
                 </div>
               </div>
@@ -1182,29 +1740,37 @@ export const AdminDashboard: React.FC = () => {
                 type="submit"
                 className="w-full bg-gradient-to-r from-teal-600 to-indigo-600 hover:from-teal-700 hover:to-indigo-700 text-white font-bold py-2 rounded-lg text-xs flex justify-center items-center gap-1.5 cursor-pointer uppercase shadow"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Publish SMM Article</span>
+                {editingBlogId ? <Save className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                <span>{editingBlogId ? 'Save SMM Article' : 'Publish SMM Article'}</span>
               </button>
             </form>
 
-            <hr className="border-gray-100" />
+            <hr className="border-gray-100 dark:border-gray-750" />
 
             <div className="space-y-2">
               <h4 className="font-bold text-xs uppercase text-slate-400">Active Articles Catalog</h4>
               <div className="space-y-2.5 max-h-[220px] overflow-y-auto">
                 {blogs.map((b) => (
-                  <div key={b.id} className="p-3 bg-gray-50 border rounded-xl flex items-center justify-between text-xs dark:bg-gray-900">
+                  <div key={b.id} className="p-3 bg-gray-50 border border-gray-150 rounded-xl flex items-center justify-between text-xs dark:bg-gray-900 dark:border-gray-750">
                     <div className="truncate">
-                      <p className="font-bold text-gray-800 truncate">{b.titleEn}</p>
+                      <p className="font-bold text-gray-800 dark:text-gray-200 truncate">{b.titleEn}</p>
                       <p className="text-[10px] text-gray-400 font-mono">Views: {b.views} • ID: {b.id}</p>
                     </div>
 
-                    <button
-                      onClick={() => deleteBlog(b.id)}
-                      className="p-1.5 bg-rose-50 text-rose-500 rounded-lg cursor-pointer hover:bg-rose-100 transition-colors shrink-0"
-                    >
-                      <Trash className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        onClick={() => loadBlogToEdit(b)}
+                        className="p-1 px-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded text-[10px] font-bold cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteBlog(b.id)}
+                        className="p-1.5 bg-rose-50 text-rose-500 rounded-lg cursor-pointer hover:bg-rose-100 transition-colors shrink-0"
+                      >
+                        <Trash className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1229,13 +1795,26 @@ export const AdminDashboard: React.FC = () => {
                   key={tck.id}
                   id={`admin-tck-node-${tck.id}`}
                   onClick={() => setSelectedTicketId(tck.id)}
-                  className={`p-3 rounded-xl border text-xs cursor-pointer transition-all ${
+                  className={`p-3 rounded-xl border text-xs cursor-pointer transition-all relative group ${
                     selectedTicketId === tck.id 
                       ? 'border-indigo-500 bg-indigo-50/15' 
                       : 'border-gray-150 bg-gray-50/50 hover:bg-gray-50'
                   }`}
                 >
-                  <p className="font-bold">{tck.subject}</p>
+                  <p className="font-bold pr-6 text-gray-900 dark:text-white">{tck.subject}</p>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm('Are you sure you want to delete this ticket database record?')) {
+                        deleteSupportTicket(tck.id);
+                        if (selectedTicketId === tck.id) setSelectedTicketId(null);
+                      }
+                    }}
+                    className="absolute top-2 right-2 p-1 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    title="Delete Ticket"
+                  >
+                    <Trash className="w-3 h-3" />
+                  </button>
                   <div className="flex items-center justify-between text-[10px] text-gray-400 font-mono mt-1">
                     <span>{tck.userName} • {tck.id}</span>
                     <span className={`px-1.5 py-0.5 rounded ${

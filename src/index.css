@@ -1,1 +1,62 @@
 @import "tailwindcss";
+
+@theme {
+  /* Redefine gray-950 to match the deep cosmic navy/dark blue background of the logo */
+  --color-gray-950: #040815;
+  --color-gray-900: #08102d;
+
+  /* Map Emerald to the glowing Neon Cyan from the logo */
+  --color-emerald-50: #eefeff;
+  --color-emerald-100: #ccfcff;
+  --color-emerald-200: #99faff;
+  --color-emerald-300: #4df5ff;
+  --color-emerald-400: #00ecff;
+  --color-emerald-500: #00d5ff; /* Primary Glowing Cyan */
+  --color-emerald-600: #00aacc;
+  --color-emerald-700: #0081bf;
+  --color-emerald-800: #005f9c;
+  --color-emerald-900: #004573;
+  --color-emerald-950: #00223e;
+
+  /* Map Teal / Accent to the glowing Neon Fuchsia/Magenta from the logo */
+  --color-teal-50: #fff2fb;
+  --color-teal-100: #ffe3f7;
+  --color-teal-200: #ffc2eb;
+  --color-teal-300: #ff91de;
+  --color-teal-400: #ff4acf;
+  --color-teal-500: #ff12be; /* Primary Glowing Magenta */
+  --color-teal-600: #d60098;
+  --color-teal-700: #a80072;
+  --color-teal-800: #7d0052;
+  --color-teal-900: #570037;
+  --color-teal-950: #33001f;
+
+  /* Let's define text and border colors that suit the neon theme */
+  --color-indigo-50: #f5f4ff;
+  --color-indigo-100: #ece9ff;
+  --color-indigo-200: #dcd6ff;
+  --color-indigo-300: #c2b5ff;
+  --color-indigo-400: #a185ff;
+  --color-indigo-500: #8052ff;
+  --color-indigo-600: #6726f5;
+  --color-indigo-700: #5514db;
+
+  /* Standard fonts to align with instructions */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+/* Add some cosmic animations and custom glowing styles at the bottom of the style sheet if needed */
+.logo-glow {
+  filter: drop-shadow(0 0 8px rgba(0, 213, 255, 0.45)) drop-shadow(0 0 20px rgba(255, 18, 190, 0.25));
+}
+
+.cosmic-card-glow {
+  box-shadow: 0 0 25px -5px rgba(0, 213, 255, 0.08), 0 0 15px -3px rgba(255, 18, 190, 0.05);
+}
+
+.dark .cosmic-card-glow {
+  box-shadow: 0 0 35px -5px rgba(0, 213, 255, 0.12), 0 0 20px -3px rgba(255, 18, 190, 0.08);
+}

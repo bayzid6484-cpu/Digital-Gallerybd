@@ -80,12 +80,15 @@ function AppContent() {
           <div 
             id="site-logo" 
             onClick={() => handleTabChange('home')}
-            className="flex items-center gap-2 cursor-pointer select-none"
+            className="flex items-center gap-2.5 cursor-pointer select-none"
           >
-            <div className="w-8.5 h-8.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white shadow-sm font-black text-sm">
-              S
-            </div>
-            <span className="font-extrabold text-sm md:text-base tracking-tight bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent dark:from-emerald-450 dark:to-teal-400">
+            <img 
+              src="/logo.svg" 
+              alt="Digital Gallery Logo" 
+              className="w-10 h-10 object-contain logo-glow" 
+              referrerPolicy="no-referrer" 
+            />
+            <span className="font-extrabold text-sm md:text-lg tracking-tight bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent font-sans">
               {lang === 'bn' ? settings.siteNameBn : settings.siteNameEn}
             </span>
           </div>
@@ -297,9 +300,14 @@ function AppContent() {
         <div className="max-w-7xl mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
           
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-black text-xs">S</div>
-              <span className="font-extrabold text-sm text-gray-900 dark:text-white">{lang === 'bn' ? settings.siteNameBn : settings.siteNameEn}</span>
+            <div className="flex items-center gap-2.5">
+              <img 
+                src="/logo.svg" 
+                alt="Digital Gallery Logo" 
+                className="w-8 h-8 object-contain logo-glow" 
+                referrerPolicy="no-referrer" 
+              />
+              <span className="font-extrabold text-sm tracking-tight bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">{lang === 'bn' ? settings.siteNameBn : settings.siteNameEn}</span>
             </div>
             <p className="text-[11px] leading-relaxed font-medium">
               We are Bangladesh's premium automated eCommerce and followup link traffic provider operating with secure servers and automated API dispatch structures.

@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <!-- Definitions for gradients and glowing filters -->
+  <defs>
+    <!-- Background radial gradient matching the deep space theme -->
+    <radialGradient id="spaceGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0a122e" />
+      <stop offset="85%" stop-color="#040816" />
+      <stop offset="100%" stop-color="#010309" />
+    </radialGradient>
+
+    <!-- Neon Cyan Glow Filter -->
+    <filter id="cyanGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Neon Magenta Glow Filter -->
+    <filter id="magentaGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Strong Dual Glow for the center container -->
+    <filter id="strongGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12" result="blur1" />
+      <feGaussianBlur stdDeviation="4" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur1" />
+        <feMergeNode in="blur2" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Deep cosmic circular background -->
+  <circle cx="250" cy="250" r="230" fill="url(#spaceGradient)" stroke="#09143c" stroke-width="2" />
+
+  <!-- Ambient glowing stars/particles in the background -->
+  <g opacity="0.65">
+    <circle cx="250" cy="95" r="3" fill="#00e5ff" />
+    <circle cx="160" cy="115" r="2" fill="#ff2efb" opacity="0.8" />
+    <circle cx="340" cy="115" r="2.5" fill="#00e5ff" />
+    <circle cx="110" cy="180" r="2" fill="#00e5ff" opacity="0.5" />
+    <circle cx="390" cy="180" r="3" fill="#ff2efb" opacity="0.7" />
+    
+    <!-- Under DG dots -->
+    <circle cx="128" cy="296" r="3.5" fill="#ff2efb" filter="url(#magentaGlow)" />
+    <circle cx="161" cy="296" r="3" fill="#ff2efb" />
+    <circle cx="194" cy="296" r="3" fill="#ff2efb" />
+    <circle cx="227" cy="296" r="3.5" fill="#ff2efb" filter="url(#magentaGlow)" />
+    
+    <circle cx="273" cy="296" r="3.5" fill="#00e5ff" filter="url(#cyanGlow)" />
+    <circle cx="306" cy="296" r="3" fill="#00e5ff" />
+    <circle cx="339" cy="296" r="3" fill="#00e5ff" />
+    <circle cx="372" cy="296" r="3.5" fill="#00e5ff" filter="url(#cyanGlow)" />
+  </g>
+
+  <!-- External circular glowing line (Cyan) -->
+  <circle cx="250" cy="250" r="175" fill="none" stroke="#00e5ff" stroke-width="4.5" filter="url(#cyanGlow)" stroke-dasharray="10 3 2 3" opacity="0.9" />
+
+  <!-- Outer ring dots -->
+  <circle cx="250" cy="250" r="195" fill="none" stroke="#00e5ff" stroke-width="1.5" stroke-dasharray="2 12" opacity="0.4" />
+
+  <!-- Ambient glowing background behind DG container -->
+  <circle cx="250" cy="190" r="70" fill="#ff2efb" opacity="0.08" filter="url(#strongGlow)" />
+
+  <!-- Glowing neon magenta double-loop shape ("DG" border) in center -->
+  <path d="M 210,135 
+           H 290 
+           A 55,55 0 0,1 290,245 
+           H 210 
+           A 55,55 0 0,1 210,135 Z" 
+        fill="none" 
+        stroke="#ff2efb" 
+        stroke-width="6.5" 
+        stroke-linejoin="round" 
+        filter="url(#magentaGlow)" />
+
+  <!-- Divider line -->
+  <path d="M 250,135 V 245" fill="none" stroke="#ff2efb" stroke-width="3.5" opacity="0.5" filter="url(#magentaGlow)" />
+
+  <!-- Solid white letters "DG" centered in the active left/right segments of the badge -->
+  <text x="200" y="208" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="64" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="-1">D</text>
+  <text x="302" y="208" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="64" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="-1">G</text>
+
+  <!-- "DIGITAL GALLERY" Brand text -->
+  <g transform="translate(250, 345)">
+    <!-- DIGITAL is Cyan -->
+    <text x="-12" y="0" font-family="'Inter', 'Montserrat', sans-serif" font-size="28" font-weight="800" fill="#00e5ff" filter="url(#cyanGlow)" text-anchor="end" letter-spacing="4">DIGITAL</text>
+    <!-- GALLERY is Magenta -->
+    <text x="12" y="0" font-family="'Inter', 'Montserrat', sans-serif" font-size="28" font-weight="800" fill="#ff2efb" filter="url(#magentaGlow)" text-anchor="start" letter-spacing="4">GALLERY</text>
+  </g>
+
+  <!-- Glowing bottom crescent line -->
+  <path d="M 125,370 A 140,140 0 0,0 375,370" fill="none" stroke="#00e5ff" stroke-width="5.5" stroke-linecap="round" filter="url(#cyanGlow)" />
+</svg>
