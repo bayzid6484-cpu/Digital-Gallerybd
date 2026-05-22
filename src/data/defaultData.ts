@@ -278,11 +278,11 @@ export const defaultCoupons: Coupon[] = [
 ];
 
 export const defaultAppSettings: AppSettings = {
-  siteNameBn: 'সেবা বুস্ট বিডি',
-  siteNameEn: 'Seba Boost BD',
+  siteNameBn: 'ডিজিটাল গ্যালারি',
+  siteNameEn: 'Digital Gallery',
   announcementBn: 'ধামাকা অফার! প্রথম অর্ডারে "BOOST50" কুপন ব্যবহার করে পেয়ে যান ১০% ইনস্ট্যান্ট ফ্ল্যাট ডিসকাউন্ট! বিকাশ ও নগদে লেনদেন সফলভাবে সচল রয়েছে।',
   announcementEn: 'Promo alert! Use coupon "BOOST50" to get 10% flat discount on your initial purchase. Secure bKash & Nagad active.',
-  contactEmail: 'support@sebaboostbd.com',
+  contactEmail: 'digitalgallery7.24@gmail.com',
   contactPhone: '+880 1712 345678',
   contactAddressBn: 'মিরপুর ১০, ঢাকা, বাংলাদেশ',
   contactAddressEn: 'Mirpur 10, Dhaka, Bangladesh',
@@ -307,8 +307,8 @@ export const defaultAppSettings: AppSettings = {
 export const defaultUsers: UserProfile[] = [
   {
     id: 'user-admin',
-    name: 'Babu Chowdhury (Admin)',
-    email: 'admin@test.com',
+    name: 'Digital Gallery Admin',
+    email: 'digitalgallery7.24@gmail.com',
     role: 'admin',
     walletBalance: 25000,
     referralCode: 'ADMIN777',

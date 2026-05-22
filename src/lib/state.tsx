@@ -9,6 +9,7 @@ import {
   defaultOrders, defaultTransactions, defaultTickets 
 } from '../data/defaultData';
 import { Language, translations } from '../translations';
+import { fetchFromCloud, saveToCloud } from './supabase';
 
 interface StateContextType {
   // Config & Translations
@@ -26,6 +27,7 @@ interface StateContextType {
   logoutUser: () => void;
   users: UserProfile[];
   updateUserBalance: (userId: string, amount: number) => void;
+  updateUserRole: (userId: string, role: 'user' | 'admin') => void;
 
   // Core Lists
   categories: Category[];
@@ -63,6 +65,10 @@ interface StateContextType {
   deleteCoupon: (id: string) => void;
   addBlog: (b: Omit<Blog, 'id' | 'views' | 'createdAt'>) => void;
   deleteBlog: (id: string) => void;
+
+  // Supabase Cloud Actions
+  syncAllToSupabase: () => Promise<{ success: boolean; message: string }>;
+  isCloudLoading: boolean;
 }
 
 const StateContext = createContext<StateContextType | undefined>(undefined);
@@ -82,51 +88,125 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [coupons, setCouponsState] = useState<Coupon[]>([]);
   const [blogs, setBlogsState] = useState<Blog[]>([]);
   const [notifications, setNotifications] = useState<string[]>([]);
+  const [isCloudLoading, setIsCloudLoading] = useState<boolean>(false);
 
   // Selected language translations
   const t = translations[lang];
 
   // Load all states on startup
   useEffect(() => {
-    const localLang = localStorage.getItem('seba_lang') as Language;
-    if (localLang) setLangState(localLang);
+    const loadAllAndSync = async () => {
+      setIsCloudLoading(true);
+      const localLang = localStorage.getItem('seba_lang') as Language;
+      if (localLang) setLangState(localLang);
 
-    const loadData = <T,>(key: string, defaultVal: T): T => {
-      const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : defaultVal;
+      const loadData = <T,>(key: string, defaultVal: T): T => {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : defaultVal;
+      };
+
+      // 1. Initial State from localStorage / defaults
+      const initialSettings = loadData('seba_settings', defaultAppSettings);
+      const initialUsers = loadData('seba_users', defaultUsers);
+      const initialCategories = loadData('seba_categories', defaultCategories);
+      const initialServices = loadData('seba_services', defaultServices);
+      const initialOrders = loadData('seba_orders', defaultOrders);
+      const initialTransactions = loadData('seba_transactions', defaultTransactions);
+      const initialTickets = loadData('seba_tickets', defaultTickets);
+      const initialCoupons = loadData('seba_coupons', defaultCoupons);
+      const initialBlogs = loadData('seba_blogs', defaultBlogs);
+
+      setSettings(initialSettings);
+      setUsersState(initialUsers);
+      setCategoriesState(initialCategories);
+      setServicesState(initialServices);
+      setOrdersState(initialOrders);
+      setTransactionsState(initialTransactions);
+      setTicketsState(initialTickets);
+      setCouponsState(initialCoupons);
+      setBlogsState(initialBlogs);
+      setNotifications(loadData('seba_notifications', [
+        "Welcome to our premium follow-link digital automation suite!",
+        "ব্যবহার করুন প্রোমো কোড BOOST50 এবং বুঝে নিন ১০% ক্যাশব্যাক ডিসকাউন্ট।"
+      ]));
+
+      // 2. Async Sync with Supabase (if tables exist)
+      try {
+        const cloudSettings = await fetchFromCloud<AppSettings>('settings', initialSettings);
+        setSettings(cloudSettings);
+
+        const cloudUsers = await fetchFromCloud<UserProfile[]>('users', initialUsers);
+        setUsersState(cloudUsers);
+
+        const cloudCategories = await fetchFromCloud<Category[]>('categories', initialCategories);
+        setCategoriesState(cloudCategories);
+
+        const cloudServices = await fetchFromCloud<Service[]>('services', initialServices);
+        setServicesState(cloudServices);
+
+        const cloudOrders = await fetchFromCloud<Order[]>('orders', initialOrders);
+        setOrdersState(cloudOrders);
+
+        const cloudTransactions = await fetchFromCloud<PaymentTransaction[]>('transactions', initialTransactions);
+        setTransactionsState(cloudTransactions);
+
+        const cloudTickets = await fetchFromCloud<SupportTicket[]>('tickets', initialTickets);
+        setTicketsState(cloudTickets);
+
+        const cloudCoupons = await fetchFromCloud<Coupon[]>('coupons', initialCoupons);
+        setCouponsState(cloudCoupons);
+
+        const cloudBlogs = await fetchFromCloud<Blog[]>('blogs', initialBlogs);
+        setBlogsState(cloudBlogs);
+
+        // Update current user references if they are already in state
+        const savedUserStr = localStorage.getItem('seba_current_user');
+        if (savedUserStr) {
+          const parsed = JSON.parse(savedUserStr) as UserProfile;
+          const freshUser = cloudUsers.find(u => u.id === parsed.id);
+          if (freshUser) {
+            setCurrentUserState(freshUser);
+            localStorage.setItem('seba_current_user', JSON.stringify(freshUser));
+          } else {
+            setCurrentUserState(parsed);
+          }
+        } else {
+          // Default user auto log-in (to make dashboard instantly readable with stats)
+          const defaultUser = cloudUsers.find(u => u.email === 'bayzid6484@gmail.com') || cloudUsers.find(u => u.role === 'admin') || cloudUsers[1];
+          if (defaultUser) {
+            setCurrentUserState(defaultUser);
+            localStorage.setItem('seba_current_user', JSON.stringify(defaultUser));
+          }
+        }
+      } catch (err) {
+        console.warn('Realtime Supabase Cloud sync error, using storage fallback:', err);
+        // Sync local current user if not updated
+        const savedUser = localStorage.getItem('seba_current_user');
+        if (savedUser) {
+          setCurrentUserState(JSON.parse(savedUser));
+        } else {
+          const defaultUser = initialUsers.find(u => u.email === 'bayzid6484@gmail.com') || initialUsers[1];
+          setCurrentUserState(defaultUser);
+          localStorage.setItem('seba_current_user', JSON.stringify(defaultUser));
+        }
+      } finally {
+        setIsCloudLoading(false);
+      }
     };
 
-    setSettings(loadData('seba_settings', defaultAppSettings));
-    setUsersState(loadData('seba_users', defaultUsers));
-    setCategoriesState(loadData('seba_categories', defaultCategories));
-    setServicesState(loadData('seba_services', defaultServices));
-    setOrdersState(loadData('seba_orders', defaultOrders));
-    setTransactionsState(loadData('seba_transactions', defaultTransactions));
-    setTicketsState(loadData('seba_tickets', defaultTickets));
-    setCouponsState(loadData('seba_coupons', defaultCoupons));
-    setBlogsState(loadData('seba_blogs', defaultBlogs));
-    setNotifications(loadData('seba_notifications', [
-      "Welcome to our premium follow-link digital automation suite!",
-      "ব্যবহার করুন প্রোমো কোড BOOST50 এবং বুঝে নিন ১০% ক্যাশব্যাক ডিসকাউন্ট।"
-    ]));
-
-    // Auto log-in Bayzid (the default user) to provide a premium instantly-accessible ready dashboard
-    const savedUser = localStorage.getItem('seba_current_user');
-    if (savedUser) {
-      setCurrentUserState(JSON.parse(savedUser));
-    } else {
-      // By default, start with Bayzid logged in to make the applet feel rich immediately!
-      const defaultUser = defaultUsers.find(u => u.email === 'bayzid6484@gmail.com') || defaultUsers[1];
-      setCurrentUserState(defaultUser);
-      localStorage.setItem('seba_current_user', JSON.stringify(defaultUser));
-    }
+    loadAllAndSync();
   }, []);
 
-  // Update helper functions that also write to localStorage
+  // Update helper functions that also write to localStorage + Supabase Cloud
   const saveAndSet = <T,>(key: string, setter: React.Dispatch<React.SetStateAction<T>>, val: T | ((prev: T) => T)) => {
     setter((prev) => {
       const nextVal = typeof val === 'function' ? (val as Function)(prev) : val;
       localStorage.setItem(key, JSON.stringify(nextVal));
+
+      // Asynchronous background write to Supabase
+      const tableName = key.replace('seba_', '');
+      saveToCloud(tableName, nextVal);
+
       return nextVal;
     });
   };
@@ -156,10 +236,12 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setCurrentUser(existing);
       return true;
     }
-    // Auto register as default user if email matches
-    if (email.toLowerCase() === 'admin@test.com') {
-      const adminAcc = users.find(u => u.role === 'admin') || defaultUsers[0];
-      setCurrentUser(adminAcc);
+    // Auto register or find admin if email matches
+    if (email.toLowerCase() === 'digitalgallery7.24@gmail.com' || email.toLowerCase() === 'admin@test.com') {
+      const adminAcc = users.find(u => u.role === 'admin') || defaultUsers.find(u => u.role === 'admin') || defaultUsers[0];
+      // Sync admin email locally to make sure it matches
+      const updatedAdmin = { ...adminAcc, email: email.toLowerCase() };
+      setCurrentUser(updatedAdmin);
       return true;
     }
     return false;
@@ -201,6 +283,21 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateUserBalance = (userId: string, amount: number) => {
     saveAndSet<UserProfile[]>('seba_users', setUsersState, (prev) => {
       const rawUsers = prev.map(u => u.id === userId ? { ...u, walletBalance: Number((u.walletBalance + amount).toFixed(2)) } : u);
+      // Sync currentUser state if logged in
+      if (currentUser && currentUser.id === userId) {
+        const updated = rawUsers.find(u => u.id === userId);
+        if (updated) {
+          setCurrentUserState(updated);
+          localStorage.setItem('seba_current_user', JSON.stringify(updated));
+        }
+      }
+      return rawUsers;
+    });
+  };
+
+  const updateUserRole = (userId: string, role: 'user' | 'admin') => {
+    saveAndSet<UserProfile[]>('seba_users', setUsersState, (prev) => {
+      const rawUsers = prev.map(u => u.id === userId ? { ...u, role } : u);
       // Sync currentUser state if logged in
       if (currentUser && currentUser.id === userId) {
         const updated = rawUsers.find(u => u.id === userId);
@@ -473,6 +570,33 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     saveAndSet<string[]>('seba_notifications', setNotifications, []);
   };
 
+  // Force seed / sync all tables to Supabase
+  const syncAllToSupabase = async (): Promise<{ success: boolean; message: string }> => {
+    try {
+      setIsCloudLoading(true);
+      const s1 = await saveToCloud('settings', settings);
+      const s2 = await saveToCloud('users', users);
+      const s3 = await saveToCloud('categories', categories);
+      const s4 = await saveToCloud('services', services);
+      const s5 = await saveToCloud('orders', orders);
+      const s6 = await saveToCloud('transactions', transactions);
+      const s7 = await saveToCloud('tickets', tickets);
+      const s8 = await saveToCloud('coupons', coupons);
+      const s9 = await saveToCloud('blogs', blogs);
+
+      if (s1 && s2 && s3 && s4 && s5 && s6 && s7 && s8 && s9) {
+        return { success: true, message: 'All tables synced successfully to Supabase!' };
+      } else {
+        return { success: true, message: 'Synced partially. Please ensure tables are created with public access in Supabase.' };
+      }
+    } catch (err: any) {
+      console.error('Supabase seed error:', err);
+      return { success: false, message: `Failed to sync: ${err.message || err}` };
+    } finally {
+      setIsCloudLoading(false);
+    }
+  };
+
   return (
     <StateContext.Provider value={{
       lang,
@@ -487,6 +611,7 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       logoutUser,
       users,
       updateUserBalance,
+      updateUserRole,
       categories,
       services,
       orders,
@@ -515,7 +640,9 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       addCoupon,
       deleteCoupon,
       addBlog,
-      deleteBlog
+      deleteBlog,
+      syncAllToSupabase,
+      isCloudLoading
     }}>
       {children}
     </StateContext.Provider>
