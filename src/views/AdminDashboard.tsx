@@ -112,6 +112,20 @@ export const AdminDashboard: React.FC = () => {
   const [editTxStatus, setEditTxStatus] = useState<PaymentTransaction['status']>('pending');
   const [editTxNote, setEditTxNote] = useState('');
 
+  // Customizable Supabase Client Configurations
+  const [supabaseUrlInput, setSupabaseUrlInput] = useState(localStorage.getItem('supabase_url') || 'https://wdljamfelwrcgxltpoqt.supabase.co');
+  const [supabaseKeyInput, setSupabaseKeyInput] = useState(localStorage.getItem('supabase_key') || 'sb_publishable_rIwkUcg8bLEWHy9FKLLciQ_wn1JqqAS');
+  const [isSqlVisible, setIsSqlVisible] = useState(false);
+  const [saveCredSuccess, setSaveCredSuccess] = useState<string | null>(null);
+
+  const handleSaveSupabaseCredentials = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem('supabase_url', supabaseUrlInput.trim());
+    localStorage.setItem('supabase_key', supabaseKeyInput.trim());
+    setSaveCredSuccess('Supabase credentials successfully saved to client state! The client will now route active queries to your specified endpoint.');
+    setTimeout(() => setSaveCredSuccess(null), 8000);
+  };
+
   if (!currentUser || currentUser.role !== 'admin') {
     return (
       <div className="max-w-md mx-auto p-8 text-center bg-white border border-gray-150 rounded-2xl dark:bg-gray-800 dark:border-gray-700">
@@ -1919,27 +1933,218 @@ export const AdminDashboard: React.FC = () => {
                 <Database className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-extrabold text-base tracking-tight leading-none text-white">Supabase Cloud Database Hub</h3>
-                <p className="text-xs text-slate-400 mt-1">Real-time persistence layer connectivity logs.</p>
+                <h3 className="font-extrabold text-base tracking-tight leading-none text-white">Supabase Cloud Database Settings</h3>
+                <p className="text-xs text-slate-400 mt-1">Configure your genuine Supabase database integration URL & Anon Key below.</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-[11px] pt-1 leading-relaxed">
-              <div className="space-y-1">
-                <span className="text-slate-500 block uppercase font-bold">Cloud Endpoint API URL</span>
-                <span className="bg-slate-950 p-2 text-slate-300 border border-slate-800 rounded-lg block truncate max-w-full">
-                  https://wdljamfelwrcgxltpoqt.supabase.co
-                </span>
+            <form onSubmit={handleSaveSupabaseCredentials} className="space-y-4 pt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-slate-400 block uppercase font-bold text-[10px]">Supabase Project URL</label>
+                  <input 
+                    type="text" 
+                    value={supabaseUrlInput}
+                    onChange={(e) => setSupabaseUrlInput(e.target.value)}
+                    placeholder="https://your-project.supabase.co"
+                    className="w-full bg-slate-950 p-2.5 text-slate-200 border border-slate-800 rounded-xl block font-mono text-xs focus:ring-1 focus:ring-emerald-500 outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-slate-400 block uppercase font-bold text-[10px]">Supabase Anon Public Key</label>
+                  <input 
+                    type="password" 
+                    value={supabaseKeyInput}
+                    onChange={(e) => setSupabaseKeyInput(e.target.value)}
+                    placeholder="your-anon-public-access-token"
+                    className="w-full bg-slate-950 p-2.5 text-slate-200 border border-slate-800 rounded-xl block font-mono text-xs focus:ring-1 focus:ring-emerald-500 outline-none"
+                  />
+                </div>
               </div>
-              <div className="space-y-1">
-                <span className="text-slate-500 block uppercase font-bold">Anon Public Access token</span>
-                <span className="bg-slate-950 p-2 text-slate-300 border border-slate-800 rounded-lg block truncate max-w-full">
-                  sb_publishable_rIwkUcg8bLEWHy9FKLLciQ_wn1JqqAS
-                </span>
-              </div>
-            </div>
 
-            <div className="bg-slate-950 p-4 border border-slate-800 rounded-2xl flex flex-col md:flex-row justify-between md:items-center gap-4 text-xs">
+              <div className="flex flex-wrap gap-2 pt-1">
+                <button
+                  type="submit"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Save Connection Credentials</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsSqlVisible(!isSqlVisible)}
+                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-4 py-2 rounded-xl border border-slate-700 transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>{isSqlVisible ? 'Hide SQL Script' : 'View Supabase SQL Setup Schema'}</span>
+                </button>
+              </div>
+
+              {saveCredSuccess && (
+                <div className="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/20 text-indigo-300 text-xs font-medium leading-relaxed">
+                  {saveCredSuccess}
+                </div>
+              )}
+            </form>
+
+            {isSqlVisible && (
+              <div className="space-y-3 bg-slate-950 p-4 rounded-xl border border-slate-800 animate-fadeIn">
+                <div className="flex justify-between items-center">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">Supabase Schema Generation Script</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const sqlText = `CREATE TABLE IF NOT EXISTS public.users (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  role TEXT DEFAULT 'user',
+  "walletBalance" NUMERIC DEFAULT 0,
+  "referralCode" TEXT,
+  "referredBy" TEXT,
+  "createdAt" TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS public.categories (
+  id TEXT PRIMARY KEY,
+  "nameBn" TEXT NOT NULL,
+  "nameEn" TEXT NOT NULL,
+  slug TEXT,
+  "iconName" TEXT,
+  "descriptionBn" TEXT,
+  "descriptionEn" TEXT
+);
+ALTER TABLE public.categories DISABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS public.services (
+  id TEXT PRIMARY KEY,
+  "categoryId" TEXT,
+  "nameBn" TEXT,
+  "nameEn" TEXT,
+  "descriptionBn" TEXT,
+  "descriptionEn" TEXT,
+  "pricePerUnit" NUMERIC,
+  "minQuantity" INTEGER,
+  "maxQuantity" INTEGER,
+  featured BOOLEAN,
+  "deliveryTimeBn" TEXT,
+  "deliveryTimeEn" TEXT,
+  "inputTypeLabelBn" TEXT,
+  "inputTypeLabelEn" TEXT,
+  "inputTypePlaceholderBn" TEXT,
+  "inputTypePlaceholderEn" TEXT
+);
+ALTER TABLE public.services DISABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS public.orders (
+  id TEXT PRIMARY KEY,
+  "userId" TEXT,
+  "serviceId" TEXT,
+  "categoryId" TEXT,
+  "targetLink" TEXT,
+  quantity INTEGER,
+  "totalPrice" NUMERIC,
+  "orderNote" TEXT,
+  status TEXT,
+  "createdAt" TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.orders DISABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS public.transactions (
+  id TEXT PRIMARY KEY,
+  "userId" TEXT,
+  amount NUMERIC,
+  method TEXT,
+  "senderNumber" TEXT,
+  "transactionId" TEXT,
+  status TEXT,
+  type TEXT,
+  note TEXT,
+  "createdAt" TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.transactions DISABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS public.tickets (
+  id TEXT PRIMARY KEY,
+  "userId" TEXT,
+  "userName" TEXT,
+  subject TEXT,
+  priority TEXT,
+  status TEXT,
+  messages JSONB,
+  "createdAt" TIMESTAMPTZ DEFAULT NOW(),
+  "updatedAt" TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.tickets DISABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS public.coupons (
+  id TEXT PRIMARY KEY,
+  code TEXT UNIQUE,
+  "discountPercent" NUMERIC,
+  "minOrderAmount" NUMERIC,
+  "expiryDate" TEXT,
+  active BOOLEAN
+);
+ALTER TABLE public.coupons DISABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS public.blogs (
+  id TEXT PRIMARY KEY,
+  "titleBn" TEXT,
+  "titleEn" TEXT,
+  "contentBn" TEXT,
+  "contentEn" TEXT,
+  "categoryBn" TEXT,
+  "categoryEn" TEXT,
+  "imageUrl" TEXT,
+  views INTEGER DEFAULT 0,
+  "createdAt" TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.blogs DISABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS public.settings (
+  id TEXT PRIMARY KEY DEFAULT 'seba_settings_id',
+  "siteNameBn" TEXT,
+  "siteNameEn" TEXT,
+  "announcementBn" TEXT,
+  "announcementEn" TEXT,
+  "contactEmail" TEXT,
+  "contactPhone" TEXT,
+  "contactAddressBn" TEXT,
+  "contactAddressEn" TEXT,
+  "facebookUrl" TEXT,
+  "telegramUrl" TEXT,
+  "youtubeUrl" TEXT,
+  "whatsappNumber" TEXT,
+  "promoBanner" JSONB,
+  "currencySymbol" TEXT,
+  "referrerCommissionPercent" NUMERIC
+);
+ALTER TABLE public.settings DISABLE ROW LEVEL SECURITY;`;
+                      navigator.clipboard.writeText(sqlText);
+                      alert('SQL Setup Script copied to clipboard! Paste it into your Supabase > SQL Editor and click "Run".');
+                    }}
+                    className="text-[10px] bg-emerald-500 hover:bg-emerald-600 px-2 py-1 rounded text-white font-bold transition-all cursor-pointer"
+                  >
+                    Copy SQL Script
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-400 leading-normal">
+                  To establish genuine login states and secure account syncs, copy this script, navigate to your <strong className="text-white">Supabase Dashboard &gt; SQL Editor</strong>, paste it, and hit <strong className="text-white">Run</strong>.
+                </p>
+                <div className="max-h-40 overflow-y-auto text-[10px] font-mono bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-slate-300 whitespace-pre scrollbar-thin">
+{`CREATE TABLE public.users (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  ...
+);`}
+                </div>
+              </div>
+            )}
+
+            <div className="bg-slate-950 p-4 border border-slate-800 rounded-2xl flex flex-col md:flex-row justify-between md:items-center gap-4 text-xs font-normal">
               <div>
                 <p className="font-semibold text-white">Manual database synchronizer & Seeds backup</p>
                 <p className="text-gray-400 text-[11px] leading-tight mt-0.5">Click sync to create schemas or copy your current client settings, catalogs, accounts directly into Supabase tables.</p>
@@ -1947,6 +2152,7 @@ export const AdminDashboard: React.FC = () => {
 
               <div className="shrink-0 flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={handleSupabaseCloudForceSync}
                   disabled={isCloudLoading}
                   className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-700 text-white px-4 py-2 rounded-xl font-bold cursor-pointer transition-all flex items-center gap-1.5"
