@@ -48,7 +48,7 @@ export const LoginRegisterView: React.FC<LoginRegisterViewProps> = ({ setTab }) 
       const success = loginUser(email);
       if (success) {
         // Redirect
-        const foundUser = email.toLowerCase() === 'admin@test.com';
+        const foundUser = email.toLowerCase() === 'admin@test.com' || email.toLowerCase() === 'digitalgallery7.24@gmail.com';
         setTab(foundUser ? 'admin' : 'dashboard');
       } else {
         setErrorText(lang === 'bn' ? 'কোনো অ্যাকাউন্ট খুঁজে পাওয়া যায়নি! নতুন করে অ্যাকাউন্ট তৈরি করুন।' : 'No registered user with this email located! Please sign up.');
@@ -171,10 +171,10 @@ export const LoginRegisterView: React.FC<LoginRegisterViewProps> = ({ setTab }) 
         </button>
       </div>
 
-      <div className="mt-4 p-3 rounded-lg bg-gray-50 text-[10px] text-gray-400 leading-relaxed font-mono">
-        💡 <span className="font-bold">Test Credentials:</span> <br />
-        • Admin login email: <span className="text-gray-600 font-bold">admin@test.com</span> <br />
-        • Regular Customer email: <span className="text-gray-600 font-bold">bayzid6484@gmail.com</span>
+      <div className="mt-5 p-3 rounded-xl bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/10 text-[11px] text-gray-500 leading-relaxed font-sans dark:from-emerald-950/20 dark:to-teal-950/20 dark:border-emerald-900/40">
+        🔑 <span className="font-bold text-gray-800 dark:text-gray-200">{lang === 'bn' ? 'কুইক ডেমো অ্যাকাউন্ট অ্যাক্সেস:' : 'Quick Demo Live Access:'}</span> <br />
+        • {lang === 'bn' ? 'অ্যাডমিন ড্যাশবোর্ড:' : 'Admin Dashboard email:'} <span className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">digitalgallery7.24@gmail.com</span> <br />
+        • {lang === 'bn' ? 'অ্যাক্টিভ গ্রাহক অ্যাকাউন্ট:' : 'Active Customer email:'} <span className="text-teal-600 dark:text-teal-405 font-mono font-bold">bayzid6484@gmail.com</span>
       </div>
     </div>
   );

@@ -310,16 +310,16 @@ function AppContent() {
               <span className="font-extrabold text-sm tracking-tight bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">{lang === 'bn' ? settings.siteNameBn : settings.siteNameEn}</span>
             </div>
             <p className="text-[11px] leading-relaxed font-medium">
-              We are Bangladesh's premium automated eCommerce and followup link traffic provider operating with secure servers and automated API dispatch structures.
+              We are Bangladesh's leading automated eCommerce distributor for premium subscriptions, legitimate software license keys, game diamond topups, and developer web codes.
             </p>
           </div>
 
           <div>
-            <h4 className="font-extrabold text-gray-900 dark:text-white uppercase mb-3 text-[10px] tracking-widest">SMM & Web Links</h4>
+            <h4 className="font-extrabold text-gray-900 dark:text-white uppercase mb-3 text-[10px] tracking-widest">Digital Mart</h4>
             <ul className="space-y-2 text-[11px]">
-              <li><button onClick={() => handleTabChange('services')} className="hover:text-emerald-500 shrink-0">Browse Services</button></li>
-              <li><button onClick={() => handleTabChange('affiliate')} className="hover:text-emerald-500 shrink-0">Affiliate Partnerships</button></li>
-              <li><button onClick={() => handleTabChange('blog')} className="hover:text-emerald-500 shrink-0">Blogging Guides</button></li>
+              <li><button onClick={() => handleTabChange('services')} className="hover:text-emerald-500 shrink-0">Product Catalog</button></li>
+              <li><button onClick={() => handleTabChange('affiliate')} className="hover:text-emerald-500 shrink-0">Partnership Program</button></li>
+              <li><button onClick={() => handleTabChange('blog')} className="hover:text-emerald-500 shrink-0">Guides & Tutorials</button></li>
             </ul>
           </div>
 

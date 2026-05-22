@@ -157,7 +157,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({ pendingOrder, setTab
     if (paymentMethod === 'bkash') return '01712-345678 (Bkash Personal)';
     if (paymentMethod === 'nagad') return '01912-887766 (Nagad Personal)';
     if (paymentMethod === 'rocket') return '01511-998877-4 (Rocket Personal)';
-    return 'support@sebaboostbd.com';
+    return 'digitalgallery7.24@gmail.com';
   };
 
   return (

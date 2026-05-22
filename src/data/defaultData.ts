@@ -313,9 +313,9 @@ export const defaultAppSettings: AppSettings = {
   contactPhone: '+880 1712 345678',
   contactAddressBn: 'মিরপুর ১০, ঢাকা, বাংলাদেশ',
   contactAddressEn: 'Mirpur 10, Dhaka, Bangladesh',
-  facebookUrl: 'https://facebook.com/sebaboostbd',
-  telegramUrl: 'https://t.me/sebaboostbd',
-  youtubeUrl: 'https://youtube.com/sebaboostbd',
+  facebookUrl: 'https://facebook.com/digitalgallery',
+  telegramUrl: 'https://t.me/digitalgallery_bd',
+  youtubeUrl: 'https://youtube.com/digitalgallery',
   whatsappNumber: '+8801712345678',
   promoBanner: {
     titleBn: 'রেফার করে আজীবনের জন্য আয় করুন!',
